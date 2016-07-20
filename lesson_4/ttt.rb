@@ -29,7 +29,7 @@ def player_turn(player, board)
     display_board(board)
     true
   else
-    puts "Please choice empty square"
+    puts "Please choice valid square"
     false
   end
 end
