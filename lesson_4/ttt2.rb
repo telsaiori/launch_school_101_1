@@ -124,9 +124,9 @@ def result_record(result, scores)
 end
 
 def five_times?(scores)
-  if scores[:player] == 1
+  if scores[:player] == 5
     return "players"
-  elsif scores[:computer] == 1
+  elsif scores[:computer] == 5
     return "computer"
   else
     false
