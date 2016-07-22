@@ -114,7 +114,7 @@ def detect_winner(brd)
 end
 
 def joinor(arr, delimiter= ', ', word = 'or')
-  arr[-1] = "#{word} #{arr.last}"
+  arr[-1] = "#{word} #{arr.last}" if arr.size > 1
   arr.size == 2 ? arr.join(' ') : arr.join(delimiter)
 end
 
