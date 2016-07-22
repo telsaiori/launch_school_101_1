@@ -8,7 +8,7 @@ COMPUTER_MARKER = 'O'
 WIN_CONDITION = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                 [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
                 [[1, 5, 9], [3, 5, 7]]
-# rubocop:disable Style/Next
+
 def prompt(msg)
   puts "=> #{msg}"
 end
@@ -105,11 +105,10 @@ end
 
 def detect_winner(brd)
   WIN_CONDITION.each do |line|
-    if brd[line[0]] == brd[line[1]] && brd[line[1]] == brd[line[2]]
-      winner = brd[line[0]]
-      return "Player" if winner == PLAYER_MARKER
-      return "Computer" if winner == COMPUTER_MARKER
-    end
+    next unless brd[line[0]] == brd[line[1]] && brd[line[1]] == brd[line[2]]
+    winner = brd[line[0]]
+    return "Player" if winner == PLAYER_MARKER
+    return "Computer" if winner == COMPUTER_MARKER
   end
   nil
 end
@@ -192,17 +191,16 @@ loop do
       prompt "It's a tie!"
     end
 
-    if five_times?(scores)
-      scores = { player: 0, computer: 0 }
-      answer = ''
-      loop do
-        prompt "Play again? (y or n )"
-        answer = gets.chomp
-        break if answer.downcase.start_with? "y", "n"
-        prompt "Please enter y or n"
-      end
-      break if answer.downcase.start_with? "n"
+    next unless five_times?(scores)
+    scores = { player: 0, computer: 0 }
+    answer = ''
+    loop do
+      prompt "Play again? (y or n )"
+      answer = gets.chomp
+      break if answer.downcase.start_with? "y", "n"
+      prompt "Please enter y or n"
     end
+    break if answer.downcase.start_with? "n"
   end
   break
 end
