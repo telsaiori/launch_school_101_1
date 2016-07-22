@@ -1,7 +1,10 @@
 require 'pry'
-INIT_MAKER = ' '
-PLAYER_MAKER = 'X'
-COMPUTER_MAKER = 'O'
+# rubocop:disable Style/MutableConstant
+INIT_MARKER = ' '
+PLAYER_MARKER = 'X'
+COMPUTER_MARKER = 'O'
+# rubocop:enable Style/MutableConstant
+
 WIN_CONDITION = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                 [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
                 [[1, 5, 9], [3, 5, 7]]
@@ -13,32 +16,31 @@ end
 # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
 def display_board(board)
   system 'clear'
-  puts "You're a #{PLAYER_MAKER}. Computer's #{COMPUTER_MAKER}"
+  puts "You're a #{PLAYER_MARKER}. Computer's #{COMPUTER_MARKER}"
   puts ""
   puts "     |     |"
-  puts "  #{board[1]}  |   #{board[2]} |  #{board[3]}"
+  puts "  #{board[1]}  |  #{board[2]}  |  #{board[3]}"
   puts "     |     |"
   puts "-----+-----+-----"
   puts "     |     |"
-  puts "  #{board[4]}  |   #{board[5]} |  #{board[6]}"
+  puts "  #{board[4]}  |  #{board[5]}  |  #{board[6]}"
   puts "     |     |"
   puts "-----+-----+-----"
   puts "     |     |"
-  puts "  #{board[7]}  |   #{board[8]} |  #{board[9]}"
+  puts "  #{board[7]}  |  #{board[8]}  |  #{board[9]}"
   puts "     |     |"
-  puts "-----+-----+-----"
   puts ""
 end
 # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
 
 def initialize_board
   new_board = {}
-  (1..9).each { |num| new_board[num] = INIT_MAKER }
+  (1..9).each { |num| new_board[num] = INIT_MARKER }
   new_board
 end
 
 def empty_squares(brd)
-  brd.keys.select { |num| brd[num] == INIT_MAKER }
+  brd.keys.select { |num| brd[num] == INIT_MARKER }
 end
 
 def player_places_piece(brd)
@@ -49,37 +51,49 @@ def player_places_piece(brd)
     break if empty_squares(brd).include?(square)
     prompt "Sorry, that's not a valid choice"
   end
-  brd[square] = PLAYER_MAKER
+  brd[square] = PLAYER_MARKER
 end
 
 def computer_places_piece(brd)
-  if ai(brd)
-    brd[ai(brd)] = COMPUTER_MAKER
+  if ai_offense(brd)
+    brd[ai_offense(brd)] = COMPUTER_MARKER
+  elsif ai_defense(brd)
+    brd[ai_defense(brd)] = COMPUTER_MARKER
   else
     square = empty_squares(brd).sample
-    brd[square] = COMPUTER_MAKER
+    brd[square] = COMPUTER_MARKER
   end
 end
 
-# rubocop:disable Style/CyclomaticComplexity
-def ai(brd)
+def ai_offense(brd)
   key = 0
   WIN_CONDITION.each do |line|
-    if brd.values_at(*line).count('O') == 2 && brd.values_at(*line).count(' ') != 0
-      return key = brd.select { |k, v| line.include?(k) && v == ' ' }.keys.first
-    else
-      key = nil
-    end
-
-    if brd.values_at(*line).count('X') == 2 && brd.values_at(*line).count(' ') != 0
-      return key = brd.select { |k, v| line.include?(k) && v == ' ' }.keys.first
+    if brd.values_at(*line).count('O') == 2
+      if brd.values_at(*line).count(' ') != 0
+        key = brd.select { |k, v| line.include?(k) && v == ' ' }.keys.first
+        break
+      end
     else
       key = nil
     end
   end
   key
 end
-# rubocop:enable Style/CyclomaticComplexity
+
+def ai_defense(brd)
+  key = 0
+  WIN_CONDITION.each do |line|
+    if brd.values_at(*line).count('X') == 2
+      if brd.values_at(*line).count(' ') != 0
+        key = brd.select { |k, v| line.include?(k) && v == ' ' }.keys.first
+        break
+      end
+    else
+      key = nil
+    end
+  end
+  key
+end
 
 def board_full?(brd)
   empty_squares(brd).empty?
@@ -93,8 +107,8 @@ def detect_winner(brd)
   WIN_CONDITION.each do |line|
     if brd[line[0]] == brd[line[1]] && brd[line[1]] == brd[line[2]]
       winner = brd[line[0]]
-      return "Player" if winner == PLAYER_MAKER
-      return "Computer" if winner == COMPUTER_MAKER
+      return "Player" if winner == PLAYER_MARKER
+      return "Computer" if winner == COMPUTER_MARKER
     end
   end
   nil
@@ -109,11 +123,11 @@ def result_record(result, scores)
   scores[result.downcase.to_sym] += 1
 end
 
-def fime_times?(scores)
-  if scores[:player] == 5
+def five_times?(scores)
+  if scores[:player] == 1
     return "players"
-  elsif scores[:computer] == 5
-    return computer
+  elsif scores[:computer] == 1
+    return "computer"
   else
     false
   end
@@ -129,9 +143,9 @@ end
 
 def alternate_player(current_player)
   if current_player == "Player"
-    current_player = "Computer"
+    return "Computer"
   else
-    current_player = "Player"
+    return "Player"
   end
 end
 
@@ -159,18 +173,14 @@ loop do
     end
     current_player = go_first(choose)
     board = initialize_board
-    prompt "Get 5 points to win"
-    prompt "Your score: #{scores[:player]}, computer's score: #{scores[:computer]}"
     loop do
       display_board(board)
+      prompt "Get 5 points to win"
+      prompt "Your score: #{scores[:player]}"
+      prompt "computer's score: #{scores[:computer]}"
       place_piece!(board, current_player)
       current_player = alternate_player(current_player)
       break if someone_won?(board) || board_full?(board)
-      # display_board(board)
-      # player_places_piece(board)
-      # break if someone_won?(board) || board_full?(board)
-      # computer_places_piece(board)
-      # break if someone_won?(board) || board_full?(board)
     end
 
     display_board(board)
@@ -182,13 +192,18 @@ loop do
       prompt "It's a tie!"
     end
 
-    if fime_times?(scores)
-      prompt "Play again? (y or n )"
-      answer = gets.chomp
-      break unless answer.downcase.start_with? "y"
+    if five_times?(scores)
+      scores = { player: 0, computer: 0 }
+      answer = ''
+      loop do
+        prompt "Play again? (y or n )"
+        answer = gets.chomp
+        break if answer.downcase.start_with? "y", "n"
+        prompt "Please enter y or n"
+      end
+      break if answer.downcase.start_with? "n"
     end
   end
   break
 end
-
 prompt "Thanks to play tic tac toe. bye-bye"
